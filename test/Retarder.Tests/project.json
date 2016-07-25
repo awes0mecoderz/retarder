@@ -1,0 +1,59 @@
+// {
+//   "version": "1.0.0-*",
+//   "buildOptions": {
+//     "debugType": "portable"
+//   },
+//   "dependencies": {
+//     "System.Runtime.Serialization.Primitives": "4.1.1",
+//     "xunit": "2.1.0",
+//     "dotnet-test-xunit": "1.0.0-rc2-192208-24"
+//   },
+//   "testRunner": "xunit",
+//   "frameworks": {
+//     "netcoreapp1.0": {
+//       "dependencies": {
+//         "Microsoft.NETCore.App": {
+//           "type": "platform",
+//           "version": "1.0.0"
+//         }
+//       },
+//       "imports": [
+//         "dotnet5.4",
+//         "portable-net451+win8"
+//       ]
+//     }
+//   }
+// }
+{
+  "version": "1.0.0-*",
+
+  "buildOptions": {
+    "warningsAsErrors": true 
+  },
+
+  "dependencies": {
+    "Retarder" : {
+      "target": "project"
+    },
+
+    "xunit": "2.2.0-beta2-build3300",
+    "dotnet-test-xunit": "2.2.0-preview2-build1029"
+  },
+
+  "testRunner": "xunit",
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      }
+    },
+    "net451": {
+      "dependencies": {
+      }
+    }
+  }
+}
