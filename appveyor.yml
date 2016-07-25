@@ -19,7 +19,14 @@ os: Visual Studio 2015
 ##   - ps: Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory($tempFile, $env:DOTNET_INSTALL_DIR)
 ##   - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
 
+before_build:
+  - cmd: dotnet --info
+  - cmd: dotnet --verbose restore
+
 build_script:
+  - cmd: dotnet --verbose build src\Retarder
+  - cmd: dotnet --verbose build test\Retarder.Tests
+  - cmd: dotnet --verbose test test\Retarder.Tests
   # dotnet info
   #- ps: dotnet --info
   # Run dotnet new 
@@ -29,23 +36,25 @@ build_script:
   #- ps: dotnet --verbose build
   #- ps: dotnet --verbose run a b
   #- ps: Pop-Location
-  - ps: cd "src\Retarder"
-  - ps: pwd
-  - ps: dotnet --verbose restore
-  - ps: dotnet --verbose build
-  - ps: dotnet --verbose test
-  - ps: Pop-Location
   
-  - ps: pwd
   
-  - ps: cd "test\Retarder.Tests"
+  #- ps: cd "src\Retarder"
+  #- ps: pwd
+  #- ps: dotnet --verbose restore
+  #- ps: dotnet --verbose build
+  #- ps: dotnet --verbose test
+  #- ps: Pop-Location
   
-  - ps: pwd
+  #- ps: pwd
   
-  - ps: dotnet --verbose restore
-  - ps: dotnet --verbose build
-  - ps: dotnet --verbose test
-  - ps: Pop-Location
+  #- ps: cd "test\Retarder.Tests"
+  
+  #- ps: pwd
+  
+  #- ps: dotnet --verbose restore
+  #- ps: dotnet --verbose build
+  #- ps: dotnet --verbose test
+  #- ps: Pop-Location
 
 
 test: off 
