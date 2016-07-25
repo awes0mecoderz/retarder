@@ -57,6 +57,11 @@ namespace awes0mecoderz.Retarder
             }
         }
 
+        public bool IsTrue() 
+        {
+            return true;    
+        }
+
         private void IsStillRetarded(object state)
         {
             // TODO Comment
