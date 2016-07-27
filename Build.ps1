@@ -58,7 +58,7 @@ exec { & dotnet restore }
 
 $revision = @{ $true = $env:APPVEYOR_BUILD_NUMBER; $false = 1 }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
 #$revision = "{0:D3}" -f [convert]::ToInt32($revision, 10)
-$revision = "{0:D3}" -f [convert]::ToInt32($revision, 10)
+$revision = "{0:D}" -f [convert]::ToInt32($revision, 10)
 
 
 exec { & dotnet test .\test\Retarder.Tests -c Release }
