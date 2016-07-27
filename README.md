@@ -7,3 +7,4 @@ master -> CodeCoverage | [![Coverage Status](https://coveralls.io/repos/github/a
 
 dev -> CI | [![Build status](https://ci.appveyor.com/api/projects/status/o3d1r6tu3vhf3gw5/branch/master?svg=true)](https://ci.appveyor.com/project/awesomecoderz/retarder/branch/dev)
 
+dev -> CodeCoverage | TODO
