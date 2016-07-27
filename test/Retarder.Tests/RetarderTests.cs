@@ -9,7 +9,7 @@ namespace awes0mecoderz.Retarder.Tests
         [Fact]
         public void Test1() 
         {
-            var retarder = new Retarder(100, 10);
+            var retarder = new Retarder(10, 10);
             Assert.True(retarder.IsTrue());
 
         }
