@@ -24,5 +24,5 @@ deploy:
 - provider: NuGet
   server: https://www.myget.org/F/awes0mecoderz/api/v2/package
   api_key:
-    secure: IEbGrj6z/Brf5vDI6oc3VwX4gZ1PqkGFuy2TQ256Nh8bQLOJHsglv5SHLU63PlG
+    secure: /IEbGrj6z/Brf5vDI6oc3VwX4gZ1PqkGFuy2TQ256Nh8bQLOJHsglv5SHLU63PlG
   skip_symbols: true
