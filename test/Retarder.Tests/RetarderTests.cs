@@ -1,17 +1,37 @@
 ﻿using System;
 using Xunit;
-using awes0mecoderz.Retarder;
-
 namespace awes0mecoderz.Retarder.Tests
 {
     public class RetarderTests
     {
-        [Fact]
-        public void Test1() 
-        {
-            var retarder = new Retarder(10, 10);
-            Assert.True(retarder.IsTrue());
+        #region Ctor
 
+        [Theory]
+        [InlineData(int.MinValue)]
+        [InlineData(0)]
+        public void Ctor_PassInvalidTimePeriod_ThrowException(int timePeriod) 
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Retarder(timePeriod, 1));
         }
+
+        [Theory]
+        [InlineData(int.MinValue)]
+        [InlineData(0)]
+        public void Ctor_PassInvalidMaxExecutions_ThrowException(int maxExecutions) 
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new Retarder(1, maxExecutions));
+        }
+
+        #endregion
+
+        #region Methods
+
+        // [Fact]
+        // public void HangOn_PassZeroTimePeriod_ThrowException() 
+        // {
+        //     Assert.Throws<ArgumentOutOfRangeException>(() => new Retarder(0, 1));
+        // }
+
+        #endregion
     }
 }

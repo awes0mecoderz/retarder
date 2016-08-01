@@ -4,86 +4,89 @@ namespace awes0mecoderz.Retarder
     using System.Collections.Concurrent;
     using System.Threading;
 
-    /// <summary>
-    /// https://en.wikipedia.org/wiki/Leaky_bucket
-    /// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
-    /// TODO Use float/double instead of int???
-    /// TODO Use ticks instead millis???
-    /// </summary>
     public class Retarder : IRetarder {
 
         #region Fields
 
-        private readonly SemaphoreSlim semaphore;
-        // Check HiPerfTimer???
-        private readonly Timer timer;
-        private readonly ConcurrentQueue<int> semaphoreExitTimesQueue;
-        private int timeSpanInMillis;
-        private int maxExecutionsPerTimeSpan;
+        private int timePeriodInMillis;
+
+        private int maxExecutionsPerTimePeriod;
+
+        private SemaphoreSlim semaphore;
+
+        private ConcurrentQueue<int> checkTimesQueue;
+
+        private Timer checkTimer;
 
         #endregion
 
-        public Retarder(int timeSpanInMillis, int maxExecutionsPerTimeSpan)
+        public Retarder(int timePeriodInMillis, int maxExecutionsPerTimePeriod)
         {
-            // Check if arguments are valid
-            if ((timeSpanInMillis <= 0) || (timeSpanInMillis >= int.MaxValue))
-            {
-                throw new ArgumentOutOfRangeException("timeSpan", "This parameter must be a positive integer!");
-            }
-            if ((maxExecutionsPerTimeSpan <= 0) || (maxExecutionsPerTimeSpan >= int.MaxValue))
-            {
-                throw new ArgumentOutOfRangeException("maxExecutionsPerTimeSpan", "This parameter must be a positive integer!");
+            // Validate arguments
+            if (timePeriodInMillis <= 0) {
+                throw new ArgumentOutOfRangeException("timePeriodInMillis", "This parameter must be a positive integer!");
             }
 
-            // Store arguments as internal state
-            this.timeSpanInMillis = timeSpanInMillis;
-            this.maxExecutionsPerTimeSpan = maxExecutionsPerTimeSpan;
-
-            // TODO Comment
-            this.semaphore = new SemaphoreSlim(this.maxExecutionsPerTimeSpan, this.maxExecutionsPerTimeSpan);
-
-            // TODO Comment
-            this.semaphoreExitTimesQueue = new ConcurrentQueue<int>();
-
-            // TODO Comment
-            this.timer = new Timer(this.IsStillRetarded, null, this.timeSpanInMillis, Timeout.Infinite);
-        }
-
-        public void Retard()
-        {
-            if (this.semaphore.Wait(Timeout.Infinite))
-            {
-                this.semaphoreExitTimesQueue.Enqueue(Environment.TickCount + this.timeSpanInMillis);
+            if (maxExecutionsPerTimePeriod <= 0) {
+                throw new ArgumentOutOfRangeException("maxExecutionsPerTimePeriod", "This parameter must be a positive integer!");
             }
+
+            // Store the arguments as internal state
+            this.timePeriodInMillis = timePeriodInMillis;
+            this.maxExecutionsPerTimePeriod = maxExecutionsPerTimePeriod;
+
+            // Configure semaphore and limit the number of concurrent executions
+            this.semaphore = new SemaphoreSlim(this.maxExecutionsPerTimePeriod, this.maxExecutionsPerTimePeriod);
+
+            // TODO Comment
+            this.checkTimesQueue = new ConcurrentQueue<int>();
+
+            // TODO Comment
+            this.checkTimer = new Timer(this.EvaluateRetardation, null, 1, Timeout.Infinite);
         }
 
-        public bool IsTrue() 
-        {
-            return true;    
-        }
-
-        private void IsStillRetarded(object state)
-        {
+        private void EvaluateRetardation(object state) {
             // TODO Comment
             int semaphoreExitTime = 0;
-            while (this.semaphoreExitTimesQueue.TryPeek(out semaphoreExitTime)
-                && (Environment.TickCount >= semaphoreExitTime))
+            while (this.checkTimesQueue.TryPeek(out semaphoreExitTime) && (Environment.TickCount >= semaphoreExitTime))
             {
                 this.semaphore.Release();
-                this.semaphoreExitTimesQueue.TryDequeue(out semaphoreExitTime);
+                this.checkTimesQueue.TryDequeue(out semaphoreExitTime);
             }
 
             // TODO Comment
-            if (this.semaphoreExitTimesQueue.TryPeek(out semaphoreExitTime))
+            if (this.checkTimesQueue.TryPeek(out semaphoreExitTime))
             {
-                this.timer.Change((semaphoreExitTime - Environment.TickCount), Timeout.Infinite);
+                this.checkTimer.Change((semaphoreExitTime - Environment.TickCount), Timeout.Infinite);
             }
             else
             {
-                this.timer.Change(this.timeSpanInMillis, Timeout.Infinite);
+                this.checkTimer.Change(this.timePeriodInMillis, Timeout.Infinite);
             }
         }
 
+        public bool HangOn()
+        {
+            // TODO Comment
+            return this.HangOn(Timeout.Infinite);
+        }
+
+        public bool HangOn(int timeoutInMillis)
+        {
+            // Validate argument
+            if (timePeriodInMillis <= 0) {
+                throw new ArgumentOutOfRangeException("timePeriodInMillis", "This parameter must be a positive integer!");
+            }
+
+            // TODO Comment
+            var threadEntered = this.semaphore.Wait(timeoutInMillis);
+
+            if (threadEntered) {
+                this.checkTimesQueue.Enqueue(Environment.TickCount + this.timePeriodInMillis);
+            }
+
+            return threadEntered;
+        }
     }
 
 }

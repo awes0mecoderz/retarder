@@ -2,8 +2,8 @@ namespace awes0mecoderz.Retarder
 {
     public interface IRetarder 
     {
-        void Retard();
+        bool HangOn();
 
-        bool IsTrue();
+        bool HangOn(int timeoutInMillis);
     }
 }
