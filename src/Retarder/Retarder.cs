@@ -4,86 +4,102 @@ namespace awes0mecoderz.Retarder
     using System.Collections.Concurrent;
     using System.Threading;
 
-    /// <summary>
-    /// https://en.wikipedia.org/wiki/Leaky_bucket
-    /// https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
-    /// TODO Use float/double instead of int???
-    /// TODO Use ticks instead millis???
-    /// </summary>
     public class Retarder : IRetarder {
 
         #region Fields
 
-        private readonly SemaphoreSlim semaphore;
-        // Check HiPerfTimer???
-        private readonly Timer timer;
-        private readonly ConcurrentQueue<int> semaphoreExitTimesQueue;
-        private int timeSpanInMillis;
-        private int maxExecutionsPerTimeSpan;
+        private int timePeriodInMillis;
+
+        private int maxExecutionsPerTimePeriod;
+
+        private SemaphoreSlim semaphore;
+
+        private ConcurrentQueue<int> spReleaseTimeQueue;
+
+        private Timer timer;
 
         #endregion
 
-        public Retarder(int timeSpanInMillis, int maxExecutionsPerTimeSpan)
+        public Retarder(int timePeriodInMillis, int maxExecutionsPerTimePeriod)
         {
-            // Check if arguments are valid
-            if ((timeSpanInMillis <= 0) || (timeSpanInMillis >= int.MaxValue))
-            {
-                throw new ArgumentOutOfRangeException("timeSpan", "This parameter must be a positive integer!");
-            }
-            if ((maxExecutionsPerTimeSpan <= 0) || (maxExecutionsPerTimeSpan >= int.MaxValue))
-            {
-                throw new ArgumentOutOfRangeException("maxExecutionsPerTimeSpan", "This parameter must be a positive integer!");
+            // Validate arguments
+            if (timePeriodInMillis <= 0) {
+                throw new ArgumentOutOfRangeException("timePeriodInMillis", "This parameter must be a positive integer!");
             }
 
-            // Store arguments as internal state
-            this.timeSpanInMillis = timeSpanInMillis;
-            this.maxExecutionsPerTimeSpan = maxExecutionsPerTimeSpan;
-
-            // TODO Comment
-            this.semaphore = new SemaphoreSlim(this.maxExecutionsPerTimeSpan, this.maxExecutionsPerTimeSpan);
-
-            // TODO Comment
-            this.semaphoreExitTimesQueue = new ConcurrentQueue<int>();
-
-            // TODO Comment
-            this.timer = new Timer(this.IsStillRetarded, null, this.timeSpanInMillis, Timeout.Infinite);
-        }
-
-        public void Retard()
-        {
-            if (this.semaphore.Wait(Timeout.Infinite))
-            {
-                this.semaphoreExitTimesQueue.Enqueue(Environment.TickCount + this.timeSpanInMillis);
+            if (maxExecutionsPerTimePeriod <= 0) {
+                throw new ArgumentOutOfRangeException("maxExecutionsPerTimePeriod", "This parameter must be a positive integer!");
             }
+
+            // Store the arguments as internal state
+            this.timePeriodInMillis = timePeriodInMillis;
+            this.maxExecutionsPerTimePeriod = maxExecutionsPerTimePeriod;
+
+            // Configure semaphore and limit the maximum number of concurrent executions
+            this.semaphore = new SemaphoreSlim(this.maxExecutionsPerTimePeriod, this.maxExecutionsPerTimePeriod);
+
+            // Setup queue that will store the list of next semaphore release times
+            this.spReleaseTimeQueue = new ConcurrentQueue<int>();
+
+            // Everytime that the timer countdown reaches "0" "EvaluateRetardation" method will be called.
+            // Timer starts right after this statement has been executed, but waits for "HangOn" method call
+            // to set up the callback method cyclic countdown
+            this.timer = new Timer(this.EvaluateRetardation, null, 1, Timeout.Infinite);
         }
 
-        public bool IsTrue() 
-        {
-            return true;    
-        }
-
-        private void IsStillRetarded(object state)
-        {
-            // TODO Comment
+        // "TimerCallback method" used by timer
+        private void EvaluateRetardation(object state) {
+            // Release one thread from semaphore each time that a "scheduled release time" has passed
             int semaphoreExitTime = 0;
-            while (this.semaphoreExitTimesQueue.TryPeek(out semaphoreExitTime)
-                && (Environment.TickCount >= semaphoreExitTime))
+            while (this.spReleaseTimeQueue.TryPeek(out semaphoreExitTime) && (Environment.TickCount >= semaphoreExitTime))
             {
                 this.semaphore.Release();
-                this.semaphoreExitTimesQueue.TryDequeue(out semaphoreExitTime);
+                this.spReleaseTimeQueue.TryDequeue(out semaphoreExitTime);
             }
 
-            // TODO Comment
-            if (this.semaphoreExitTimesQueue.TryPeek(out semaphoreExitTime))
+            // If the queue has values...
+            if (this.spReleaseTimeQueue.TryPeek(out semaphoreExitTime))
             {
+                // Adjust the timer for the next "scheduled release time"
                 this.timer.Change((semaphoreExitTime - Environment.TickCount), Timeout.Infinite);
             }
             else
             {
-                this.timer.Change(this.timeSpanInMillis, Timeout.Infinite);
+                // If not... wait for "HangOn" method call to set up the callback cyclic countdown again
+                this.timer.Change(this.timePeriodInMillis, Timeout.Infinite);
             }
         }
 
-    }
+        // This method is responsible for block the thread until there is an available oportunity to execute the next statement
+        // of code that calls this method
+        public bool HangOn()
+        {
+            // Calls the "HangOn(int)" signature with an infinite timeout
+            // Returns true if the current thread was signaled by the semaphore, false otherwise
+            return this.HangOn(Timeout.Infinite);
+        }
 
+        // This method is responsible for block the thread until there is an available oportunity to execute the next statement
+        // of code that calls this method or a timeout defined by you has been reached
+        public bool HangOn(int timeoutInMillis)
+        {
+            // Validate argument
+            if (timePeriodInMillis <= 0) {
+                throw new ArgumentOutOfRangeException("timePeriodInMillis", "This parameter must be a positive integer!");
+            }
+
+            // Waits until there is an available oportunity to put the current thread inside semaphore or
+            // a timeout defined has been reached
+            var threadEntered = this.semaphore.Wait(timeoutInMillis);
+
+            // If the timeout has not been reached, we will define the earliest moment that the semaphore will
+            // release the current thread
+            if (threadEntered) {
+                this.spReleaseTimeQueue.Enqueue(Environment.TickCount + this.timePeriodInMillis);
+            }
+
+            // Returns true if the current thread was signaled by the semaphore, false otherwise
+            return threadEntered;
+        }
+    }
 }
