@@ -63,4 +63,9 @@ $revision = "{0:D}" -f [convert]::ToInt32($revision, 10)
 
 exec { & dotnet test .\test\Retarder.Tests -c Release }
 
-exec { & dotnet pack .\src\Retarder -c Release -o .\artifacts --version-suffix=$revision }  
+# dotnet cli --version-suffix is bugged, we can't append version-suffix for release versions
+# "version" : "1.0.*" is not allowed / "1.0.0-*" makes nuGet thinks that is a prerelease package 
+# exec { & dotnet pack .\src\Retarder -c Release -o .\artifacts --version-suffix=$revision }
+# please manualy edit this for new versions
+$finalRevision = "1.0." + $revision;
+exec { & dotnet pack .\src\Retarder -c Release -o .\artifacts --version-suffix=$finalRevision }    

@@ -1,5 +1,8 @@
 {
-  "version": "1.0.0-*",
+  // dotnet cli --version-suffix is bugged, we can't append version-suffix for release versions
+  // "version" : "1.0.*" is not allowed / "1.0.0-*" makes nuGet thinks that is a prerelease package 
+  // PLEASE EDIT BUILD.ps1 file for new builds
+  // "version": "1.0.*",
 
   "dependencies": {
     "NETStandard.Library": "1.6.0"
