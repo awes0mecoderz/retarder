@@ -22,15 +22,15 @@ artifacts:
 
 deploy:  
 - provider: NuGet
+  api_key:
+    secure: YowZGgj7qVFyJ13Dd7Cz9paGWhrDgtOzd+pCAJXKQOsqq8Bz01dDhB6NnMv3jiwJ
+  skip_symbols: true
+  on:
+    branch: master
+- provider: MyGet
   server: https://www.myget.org/F/awes0mecoderz/api/v2/package
   api_key:
     secure: /IEbGrj6z/Brf5vDI6oc3VwX4gZ1PqkGFuy2TQ256Nh8bQLOJHsglv5SHLU63PlG
   skip_symbols: false
   on:
     branch: dev
-- provider: NuGet
-  api_key:
-    secure: YowZGgj7qVFyJ13Dd7Cz9paGWhrDgtOzd+pCAJXKQOsqq8Bz01dDhB6NnMv3jiwJ
-  skip_symbols: true
-  on:
-    branch: master
