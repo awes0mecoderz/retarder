@@ -1,7 +1,8 @@
-﻿using System;
-using Xunit;
-namespace awes0mecoderz.Retarder.Tests
+﻿namespace awes0mecoderz.Retarder.Tests
 {
+    using System;
+    using Xunit;
+
     public class RetarderTests
     {
         #region Ctor
@@ -26,11 +27,7 @@ namespace awes0mecoderz.Retarder.Tests
 
         #region Methods
 
-        // [Fact]
-        // public void HangOn_PassZeroTimePeriod_ThrowException() 
-        // {
-        //     Assert.Throws<ArgumentOutOfRangeException>(() => new Retarder(0, 1));
-        // }
+        // Nothing has been done yet
 
         #endregion
     }
