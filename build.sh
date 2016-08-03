@@ -26,4 +26,4 @@ mono \
 revision=${TRAVIS_JOB_ID:=1}  
 revision=$(printf "%04d" $revision) 
 
-dotnet pack ./src/PROJECT_NAME -c Release -o ./artifacts --version-suffix=$revision  
+dotnet pack ./src/Retarder -c Release -o ./artifacts --version-suffix=$revision  
