@@ -17,7 +17,11 @@ dotnet restore
 # # Instead, run directly with mono for the full .net version 
 # dotnet build ./test/Retarder.Tests -c Release -f net451
 
-dotnet test ./test/Retarder.Tests -c Release
+dotnet test ./test/Retarder.Tests -c Release -f netcoreapp1.0
+
+dotnet build ./test/Retarder.Tests -c Release -f net451
+
+mono ./test/Retarder.Tests/bin/Release/net451/*/dotnet-test-xunit.exe ./test/Retarder.Tests/bin/Release/net451/*/Retarder.Tests.dll
 
 # mono ./test/Retarder.Tests/bin/Release/net451/*/dotnet-test-xunit.exe
 # mono ./test/Retarder.Tests/bin/Release/net451/*/Retarder.Tests.dll
